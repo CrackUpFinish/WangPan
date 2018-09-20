@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title>格斗游戏</title>
+		<script type="text/javascript">
+			var c = 3;
+			var t; //计时器t
+			var hp1 = 100;
+			var hp2 = 100;
+			var BianShiZhi=0;//鞭尸值
+			var MaxBianShiZhi=200;//鞭尸值
+			var status = 1; //当为1时，就是玩家1进攻，否则为玩家2进攻
+			var bullyTimer; //计时器bullyTimer
+			function timedCount() {
+			if(BianShiZhi<=MaxBianShiZhi)	{//
+				document.getElementById('txt').innerHTML = c; //获取或更改p标签的值，不能通过$("#txt").val()来获取或更改
+				t = setTimeout("timedCount()", 1000); //延缓一秒执行timedCount()函数，也就是无限执行此函数
+				c = c - 1;
+				if(c < 0) {
+					clearTimeout(t) //移除计时器t
+					name1 = $("#boxer1").val(); //获取id为boxer1的标签的值
+					name2 = $("#boxer2").val(); //获取id为boxer2的标签的值
+					document.getElementById('txt').innerHTML = "对战开始！" + name1 + "对" + name2; //获取或更改p标签的值，不能通过$("#txt").val()来获取或更改
+					HPStat(hp1, hp2, name1, name2);
+					bullyTimer = setInterval(function() {
+						var atk = Math.floor(Math.random() * 50); //攻击力。0到50间的随机整数
+						var Miss = Math.floor(Math.random() * 6); //闪避几率。0到6间的随机整数
+						var Critical = Math.floor(Math.random() * 100); //暴击率。0到100间的随机整数
+						if(hp2 <= 0 || hp1 <= 0) { //其中一个挂掉
+							Miss = 99; //闪避永远为0
+						}
+						if(status == 1) {
+							if(Miss <= 1) {
+								$("#FightMessage").append(name2 + "躲掉了攻击！<br/>");
+							} else {
+								if(Critical <= 10) {
+									$("#FightMessage").append(name1 + "触发了暴击！");
+									atk *= 2;
+								}
+								hp2 -= atk;
+								$("#FightMessage").append(name2 + "受到" + atk + "点伤害<br/>");
+							}
+
+							status=2; //下次转为2进攻
+							if(hp2 <= 0) { //2号死掉，
+								status = 1; //永远是1的进攻
+								BianShiZhi+=atk;//增加鞭尸值，超过200则停止战斗
+							}
+						} else {
+							if(Miss <= 1) {
+								$("#FightMessage").append(name1 + "躲掉了攻击！<br/>");
+							} else {
+								if(Critical <= 10) {
+									$("#FightMessage").append(name2 + "触发了暴击！");
+									atk *= 2;
+								}
+								hp1 -= atk;
+								$("#FightMessage").append(name1 + "受到" + atk + "点伤害<br/>");
+							}
+
+							status = 1; //下次转为1进攻
+							if(hp1 <= 0) { //1号死掉，
+								status = 2; //永远是2的进攻
+								BianShiZhi+=atk;//增加鞭尸值，超过200则停止战斗
+							}
+						};
+						if(Miss > 1) {
+							switch(atk) { //给战斗描述润色
+								case 0:
+									$("#FightMessage").append("挠痒痒的攻击！<br/>");
+									break;
+								case 1:
+								case 2:
+								case 3:
+								case 4:
+								case 5:
+									$("#FightMessage").append("一个手掌就能数清的伤害！<br/>");
+									break;
+								case 6:
+								case 7:
+									$("#FightMessage").append("好吧,这得是变异的一个手掌才能数清的伤害!<br/>");
+									break;
+							}
+						}
+
+						HPStat(hp1, hp2, name1, name2);
+					}, 1000);
+				};
+				}
+			else{
+				$("#FightMessage").append("够了，不要再鞭尸了！<br/>");
+				
+			}
+			};
+
+			function HPStat(hp1, hp2, name1, name2) {
+				if(hp1 < 0) {hp1 = 0;}
+				if(hp2 < 0) { hp2 = 0; }
+				$("#hp1").html(name1 + "的血量:" + hp1);
+				$("#hp2").html(name2 + "的血量:" + hp2);
+
+				if(hp1 <= 0 || hp2 <= 0) { //其中一人的血量小于等于0时，停止互殴
+					clearInterval(bullyTimer);
+				}
+
+			};
+		</script>
+		<script type="text/javascript" src="js/jquery.js"></script>
+
+	</head>
+
+	<body>
+		<div>拳击手1：<input type="text" id="boxer1" value="Q"></div>
+		<div>拳击手2：<input type="text" id="boxer2" value="W"></div>
+		<button id="fight" onClick="timedCount();">开始</button>
+		<p id="txt"></p>
+		<div id="hp1"></div>
+		<div id="hp2"></div>
+		<div id="FightMessage"></div>
+	</body>
+
+</html>
